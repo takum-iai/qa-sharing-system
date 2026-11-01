@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>質問共有システム</title>
+  <style>
+    .tab {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #ddd;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .tab.active {
+      background: #aaa;
+      font-weight: bold;
+    }
+    .content {
+      display: none;
+      margin-top: 20px;
+    }
+    .content.active {
+      display: block;
+    }
+    #userName {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+  </style>
+
+  <!-- Firebase SDK（compat版） -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBIP9FIv2tBLLN_0RU5L47JNOgNZ-cay2s",
+      authDomain: "qa-sharing-system.firebaseapp.com",
+      projectId: "qa-sharing-system",
+      storageBucket: "qa-sharing-system.appspot.com",
+      messagingSenderId: "965605493318",
+      appId: "1:965605493318:web:d36649b60d0178fef39847"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    /* ★★★ ログインID方式（内部でメールに変換） ★★★ */
+    const USERS = {
+      "ayano": { name: "文乃", pass: "ayano1125", field: "answerA", email: "ayano@ayano.com" },
+      "takumi": { name: "拓海", pass: "takumi1017", field: "answerT", email: "takumi@takumi.com" }
+    };
+  </script>
+
+  <script>
+    /* -------------------------
+       ログイン
+    ------------------------- */
+    function login() {
+      const id = document.getElementById("loginId").value;
+      const pass = document.getElementById("loginPass").value;
+
+      if (!USERS[id] || USERS[id].pass !== pass) {
+        alert("ログイン失敗：IDまたはPWが違います");
+        return;
+      }
+
+      const email = USERS[id].email;
+
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+          const userInfo = USERS[id];
+          document.getElementById("loginArea").style.display = "none";
+          document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
+          document.getElementById("logoutBtn").style.display = "inline-block";
+          loadQuestions();
+        })
+        .catch(err => alert("ログイン失敗：" + err.message));
+    }
+
+    /* -------------------------
+       ログアウト
+    ------------------------- */
+    function logout() {
+      auth.signOut().then(() => {
+        alert("ログアウトしました");
+        document.getElementById("loginArea").style.display = "block";
+        document.getElementById("userName").innerText = "";
+        document.getElementById("logoutBtn").style.display = "none";
+      });
+    }
+
+    /* -------------------------
+       質問追加
+    ------------------------- */
+    function addQuestion() {
+      const text = prompt("追加する質問を入力してください：");
+      if (!text) return;
+
+      db.collection("questions").add({
+        text: text,
+        createdAt: new Date()
+      }).then(() => {
+        alert("質問を追加しました！");
+        loadQuestions();
+      });
+    }
+
+    /* -------------------------
+       質問一覧（回答入力欄付き）
+    ------------------------- */
+    function loadQuestions() {
+      const area = document.getElementById("questionArea");
+      area.innerHTML = "";
+
+      db.collection("questions").orderBy("createdAt").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+
+          div.innerHTML = `
+            <p><strong>${data.text}</strong></p>
+            <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
+            <button onclick="sendAnswer('${doc.id}')">送信</button>
+            <hr>
+          `;
+
+          area.appendChild(div);
+        });
+      });
+    }
+
+    /* -------------------------
+       回答送信（ログインユーザーごとに保存）
+    ------------------------- */
+    function sendAnswer(id) {
+      const answer = document.getElementById(`answer_${id}`).value;
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("ログインしてください");
+        return;
+      }
+
+      const email = user.email;
+      const userInfo = Object.values(USERS).find(u => u.email === email);
+
+      db.collection("questions").doc(id).update({
+        [userInfo.field]: answer
+      }).then(() => {
+        alert("回答を送信しました！");
+      });
+    }
+
+    /* -------------------------
+       回答一覧読み込み
+    ------------------------- */
+    function loadAnswerList() {
+      const table = document.querySelector("#listTab table");
+
+      table.querySelectorAll("tr:not(:first-child)").forEach(tr => tr.remove());
+
+      db.collection("questions").orderBy("createdAt").get().then(snapshot => {
+        let index = 1;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td>${index}</td>
+            <td>${data.answerA || ""}</td>
+            <td>${data.answerT || ""}</td>
+          `;
+
+          table.appendChild(tr);
+          index++;
+        });
+      });
+    }
+
+    /* -------------------------
+       タブ切り替え
+    ------------------------- */
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+
+      if (tabId === "answerTab") {
+        loadQuestions();
+      } else if (tabId === "listTab") {
+        loadAnswerList();
+      }
+    }
+
+    /* -------------------------
+       初期処理
+    ------------------------- */
+    window.onload = () => {
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          const email = user.email;
+          const userInfo = Object.values(USERS).find(u => u.email === email);
+
+          document.getElementById("loginArea").style.display = "none";
+          document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
+          document.getElementById("logoutBtn").style.display = "inline-block";
+          loadQuestions();
+        }
+      });
+    };
+  </script>
+
+</head>
+<body>
+
+  <!-- ログイン画面 -->
+  <div id="loginArea">
+    <h2>ログイン</h2>
+    <input id="loginId" type="text" placeholder="ログインID">
+    <input id="loginPass" type="password" placeholder="パスワード">
+    <button onclick="login()">ログイン</button>
+    <hr>
+  </div>
+
+  <!-- ログインユーザー名表示 -->
+  <div id="userName"></div>
+  <button id="logoutBtn" onclick="logout()" style="display:none;">ログアウト</button>
+
+  <h1>質問共有システム</h1>
+
+  <!-- タブ -->
+  <div>
+    <div class="tab active" onclick="showTab('answerTab')">回答する</div>
+    <div class="tab" onclick="showTab('listTab')">回答一覧</div>
+  </div>
+
+  <!-- 回答タブ -->
+  <div id="answerTab" class="content active">
+    <h2>質問に回答する</h2>
+    <button onclick="addQuestion()">＋ 質問を追加</button>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- 一覧タブ -->
+  <div id="listTab" class="content">
+    <h2>回答一覧</h2>
+    <table border="1">
+      <tr>
+        <th>No</th>
+        <th>文乃</th>
+        <th>拓海</th>
+      </tr>
+    </table>
+  </div>
+
+</body>
+</html>
