@@ -39,6 +39,48 @@
       const app = firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
     </script>
+<script>
+  function addQuestion() {
+    const text = prompt("追加する質問を入力してください：");
+    if (!text) return;
+
+    db.collection("questions").add({
+      text: text,
+      createdAt: new Date()
+    }).then(() => {
+      alert("質問を追加しました！");
+      loadQuestions();
+    });
+  }
+
+  function loadQuestions() {
+    const area = document.getElementById("questionArea");
+    area.innerHTML = "";
+
+    db.collection("questions").orderBy("createdAt").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const q = doc.data().text;
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <p><strong>${q}</strong></p>
+          <input type="text" placeholder="あなたの回答を入力"
+                 onchange="saveAnswer('${doc.id}', this.value)">
+          <hr>
+        `;
+        area.appendChild(div);
+      });
+    });
+  }
+
+  function saveAnswer(id, answer) {
+    db.collection("questions").doc(id).update({
+      answerA: answer
+    });
+  }
+
+  window.onload = loadQuestions;
+</script>
+
 </head>
 <body>
 
