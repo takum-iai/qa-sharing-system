@@ -29,7 +29,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB9PFIVztBLLN_0RUSL47JNOgNZ-cay2s",
@@ -46,6 +45,7 @@
 
   <!-- Firestore 質問追加・読み込み・回答保存 -->
   <script>
+    // 質問追加
     function addQuestion() {
       const text = prompt("追加する質問を入力してください：");
       if (!text) return;
@@ -59,31 +59,65 @@
       });
     }
 
+    // 質問一覧読み込み（回答入力欄付き）
     function loadQuestions() {
       const area = document.getElementById("questionArea");
       area.innerHTML = "";
 
       db.collection("questions").orderBy("createdAt").get().then(snapshot => {
         snapshot.forEach(doc => {
-          const q = doc.data().text;
+          const data = doc.data();
           const div = document.createElement("div");
+
           div.innerHTML = `
-            <p><strong>${q}</strong></p>
-            <input type="text" placeholder="あなたの回答を入力"
-                   onchange="saveAnswer('${doc.id}', this.value)">
+            <p><strong>${data.text}</strong></p>
+            <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
+            <button onclick="sendAnswer('${doc.id}')">送信</button>
             <hr>
           `;
+
           area.appendChild(div);
         });
       });
     }
 
-    function saveAnswer(id, answer) {
+    // 回答送信
+    function sendAnswer(id) {
+      const answer = document.getElementById(`answer_${id}`).value;
+
       db.collection("questions").doc(id).update({
         answerA: answer
+      }).then(() => {
+        alert("回答を送信しました！");
       });
     }
 
+    // 回答一覧読み込み
+    function loadAnswerList() {
+      const table = document.querySelector("#listTab table");
+
+      // ヘッダー以外の行を削除
+      table.querySelectorAll("tr:not(:first-child)").forEach(tr => tr.remove());
+
+      db.collection("questions").orderBy("createdAt").get().then(snapshot => {
+        let index = 1;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td>${index}</td>
+            <td>${data.answerA || ""}</td>
+            <td>${data.answerB || ""}</td>
+          `;
+
+          table.appendChild(tr);
+          index++;
+        });
+      });
+    }
+
+    // 初期表示
     window.onload = loadQuestions;
   </script>
 
@@ -124,6 +158,12 @@
 
       event.target.classList.add('active');
       document.getElementById(tabId).classList.add('active');
+
+      if (tabId === "answerTab") {
+        loadQuestions();
+      } else if (tabId === "listTab") {
+        loadAnswerList();
+      }
     }
   </script>
 
