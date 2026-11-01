@@ -22,6 +22,11 @@
     .content.active {
       display: block;
     }
+    #userName {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
   </style>
 
   <!-- Firebase SDK（compat版） -->
@@ -42,32 +47,50 @@
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+
+    // 固定ユーザー
+    const USERS = {
+      "a@test.com": { name: "文乃", pass: "a1125", field: "answerA" },
+      "b@test.com": { name: "拓海", pass: "t1017", field: "answerB" }
+    };
   </script>
 
   <script>
     /* -------------------------
-       ログイン / 新規登録
+       ログイン
     ------------------------- */
     function login() {
       const email = document.getElementById("loginEmail").value;
       const pass = document.getElementById("loginPass").value;
 
+      // 固定ユーザー判定
+      if (!USERS[email] || USERS[email].pass !== pass) {
+        alert("ログイン失敗：ユーザーが存在しません");
+        return;
+      }
+
+      // Firebase Auth にログイン
       auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
-          alert("ログインしました！");
+          const userInfo = USERS[email];
           document.getElementById("loginArea").style.display = "none";
+          document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
+          document.getElementById("logoutBtn").style.display = "inline-block";
           loadQuestions();
         })
         .catch(err => alert("ログイン失敗：" + err.message));
     }
 
-    function signup() {
-      const email = document.getElementById("loginEmail").value;
-      const pass = document.getElementById("loginPass").value;
-
-      auth.createUserWithEmailAndPassword(email, pass)
-        .then(() => alert("登録完了！ログインしてください"))
-        .catch(err => alert("登録失敗：" + err.message));
+    /* -------------------------
+       ログアウト
+    ------------------------- */
+    function logout() {
+      auth.signOut().then(() => {
+        alert("ログアウトしました");
+        document.getElementById("loginArea").style.display = "block";
+        document.getElementById("userName").innerText = "";
+        document.getElementById("logoutBtn").style.display = "none";
+      });
     }
 
     /* -------------------------
@@ -123,12 +146,8 @@
       }
 
       const email = user.email;
-
-      // Aさん / Bさん 判定（メールアドレスで判定）
-      let field = "";
-      if (email.includes("a@")) field = "answerA";
-      else if (email.includes("b@")) field = "answerB";
-      else field = "answerOther";
+      const userInfo = USERS[email];
+      const field = userInfo.field;
 
       db.collection("questions").doc(id).update({
         [field]: answer
@@ -180,11 +199,17 @@
       }
     }
 
+    /* -------------------------
+       初期処理
+    ------------------------- */
     window.onload = () => {
-      // ログインしていない場合はログイン画面を表示
       auth.onAuthStateChanged(user => {
         if (user) {
+          const email = user.email;
+          const userInfo = USERS[email];
           document.getElementById("loginArea").style.display = "none";
+          document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
+          document.getElementById("logoutBtn").style.display = "inline-block";
           loadQuestions();
         }
       });
@@ -200,9 +225,12 @@
     <input id="loginEmail" type="text" placeholder="メールアドレス">
     <input id="loginPass" type="password" placeholder="パスワード">
     <button onclick="login()">ログイン</button>
-    <button onclick="signup()">新規登録</button>
     <hr>
   </div>
+
+  <!-- ログインユーザー名表示 -->
+  <div id="userName"></div>
+  <button id="logoutBtn" onclick="logout()" style="display:none;">ログアウト</button>
 
   <h1>質問共有システム</h1>
 
