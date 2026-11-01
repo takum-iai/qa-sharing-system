@@ -2,10 +2,73 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>質問共有システム（仮）</title>
+  <title>質問共有システム</title>
+  <style>
+    .tab {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #ddd;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .tab.active {
+      background: #aaa;
+      font-weight: bold;
+    }
+    .content {
+      display: none;
+      margin-top: 20px;
+    }
+    .content.active {
+      display: block;
+    }
+  </style>
 </head>
 <body>
+
   <h1>質問共有システム</h1>
-  <p>ここから少しずつ作っていきます。</p>
+
+  <!-- タブ -->
+  <div>
+    <div class="tab active" onclick="showTab('answerTab')">回答する</div>
+    <div class="tab" onclick="showTab('listTab')">回答一覧</div>
+  </div>
+
+  <!-- 回答タブ -->
+  <div id="answerTab" class="content active">
+    <h2>質問に回答する</h2>
+    <button onclick="addQuestion()">＋ 質問を追加</button>
+    <div id="questionArea">
+      <!-- ここに質問と回答欄が並ぶ -->
+    </div>
+  </div>
+
+  <!-- 一覧タブ -->
+  <div id="listTab" class="content">
+    <h2>回答一覧</h2>
+    <table border="1">
+      <tr>
+        <th>No</th>
+        <th>Aさん</th>
+        <th>Bさん</th>
+      </tr>
+      <!-- ここに一覧が入る -->
+    </table>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function addQuestion() {
+      alert("ここに質問追加機能を作ります（Step3で実装）");
+    }
+  </script>
+
 </body>
 </html>
