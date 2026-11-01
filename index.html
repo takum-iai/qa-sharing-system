@@ -41,11 +41,38 @@
 
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
   </script>
 
-  <!-- Firestore 質問追加・読み込み・回答保存 -->
   <script>
-    // 質問追加
+    /* -------------------------
+       ログイン / 新規登録
+    ------------------------- */
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+          alert("ログインしました！");
+          document.getElementById("loginArea").style.display = "none";
+          loadQuestions();
+        })
+        .catch(err => alert("ログイン失敗：" + err.message));
+    }
+
+    function signup() {
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(() => alert("登録完了！ログインしてください"))
+        .catch(err => alert("登録失敗：" + err.message));
+    }
+
+    /* -------------------------
+       質問追加
+    ------------------------- */
     function addQuestion() {
       const text = prompt("追加する質問を入力してください：");
       if (!text) return;
@@ -59,7 +86,9 @@
       });
     }
 
-    // 質問一覧読み込み（回答入力欄付き）
+    /* -------------------------
+       質問一覧（回答入力欄付き）
+    ------------------------- */
     function loadQuestions() {
       const area = document.getElementById("questionArea");
       area.innerHTML = "";
@@ -81,22 +110,39 @@
       });
     }
 
-    // 回答送信
+    /* -------------------------
+       回答送信（ログインユーザーごとに保存）
+    ------------------------- */
     function sendAnswer(id) {
       const answer = document.getElementById(`answer_${id}`).value;
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("ログインしてください");
+        return;
+      }
+
+      const email = user.email;
+
+      // Aさん / Bさん 判定（メールアドレスで判定）
+      let field = "";
+      if (email.includes("a@")) field = "answerA";
+      else if (email.includes("b@")) field = "answerB";
+      else field = "answerOther";
 
       db.collection("questions").doc(id).update({
-        answerA: answer
+        [field]: answer
       }).then(() => {
         alert("回答を送信しました！");
       });
     }
 
-    // 回答一覧読み込み
+    /* -------------------------
+       回答一覧読み込み
+    ------------------------- */
     function loadAnswerList() {
       const table = document.querySelector("#listTab table");
 
-      // ヘッダー以外の行を削除
       table.querySelectorAll("tr:not(:first-child)").forEach(tr => tr.remove());
 
       db.collection("questions").orderBy("createdAt").get().then(snapshot => {
@@ -117,12 +163,46 @@
       });
     }
 
-    // 初期表示
-    window.onload = loadQuestions;
+    /* -------------------------
+       タブ切り替え
+    ------------------------- */
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+
+      if (tabId === "answerTab") {
+        loadQuestions();
+      } else if (tabId === "listTab") {
+        loadAnswerList();
+      }
+    }
+
+    window.onload = () => {
+      // ログインしていない場合はログイン画面を表示
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          document.getElementById("loginArea").style.display = "none";
+          loadQuestions();
+        }
+      });
+    };
   </script>
 
 </head>
 <body>
+
+  <!-- ログイン画面 -->
+  <div id="loginArea">
+    <h2>ログイン</h2>
+    <input id="loginEmail" type="text" placeholder="メールアドレス">
+    <input id="loginPass" type="password" placeholder="パスワード">
+    <button onclick="login()">ログイン</button>
+    <button onclick="signup()">新規登録</button>
+    <hr>
+  </div>
 
   <h1>質問共有システム</h1>
 
@@ -150,22 +230,6 @@
       </tr>
     </table>
   </div>
-
-  <script>
-    function showTab(tabId) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-
-      event.target.classList.add('active');
-      document.getElementById(tabId).classList.add('active');
-
-      if (tabId === "answerTab") {
-        loadQuestions();
-      } else if (tabId === "listTab") {
-        loadAnswerList();
-      }
-    }
-  </script>
 
 </body>
 </html>
