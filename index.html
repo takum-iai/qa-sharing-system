@@ -23,63 +23,67 @@
       display: block;
     }
   </style>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyB9PFIVztBLLN_0RUSL47JNOgNZ-cay2s",
-        authDomain: "qa-sharing-system.firebaseapp.com",
-        projectId: "qa-sharing-system",
-        storageBucket: "qa-sharing-system.firebasestorage.app",
-        messagingSenderId: "96565493318",
-        appId: "1:96565493318:web:d3649b6d0178ef39847"
-      };
-    
-      const app = firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-    </script>
-<script>
-  function addQuestion() {
-    const text = prompt("追加する質問を入力してください：");
-    if (!text) return;
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
-    db.collection("questions").add({
-      text: text,
-      createdAt: new Date()
-    }).then(() => {
-      alert("質問を追加しました！");
-      loadQuestions();
-    });
-  }
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9PFIVztBLLN_0RUSL47JNOgNZ-cay2s",
+      authDomain: "qa-sharing-system.firebaseapp.com",
+      projectId: "qa-sharing-system",
+      storageBucket: "qa-sharing-system.firebasestorage.app",
+      messagingSenderId: "96565493318",
+      appId: "1:96565493318:web:d3649b6d0178ef39847"
+    };
 
-  function loadQuestions() {
-    const area = document.getElementById("questionArea");
-    area.innerHTML = "";
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 
-    db.collection("questions").orderBy("createdAt").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const q = doc.data().text;
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <p><strong>${q}</strong></p>
-          <input type="text" placeholder="あなたの回答を入力"
-                 onchange="saveAnswer('${doc.id}', this.value)">
-          <hr>
-        `;
-        area.appendChild(div);
+  <!-- Firestore 質問追加・読み込み・回答保存 -->
+  <script>
+    function addQuestion() {
+      const text = prompt("追加する質問を入力してください：");
+      if (!text) return;
+
+      db.collection("questions").add({
+        text: text,
+        createdAt: new Date()
+      }).then(() => {
+        alert("質問を追加しました！");
+        loadQuestions();
       });
-    });
-  }
+    }
 
-  function saveAnswer(id, answer) {
-    db.collection("questions").doc(id).update({
-      answerA: answer
-    });
-  }
+    function loadQuestions() {
+      const area = document.getElementById("questionArea");
+      area.innerHTML = "";
 
-  window.onload = loadQuestions;
-</script>
+      db.collection("questions").orderBy("createdAt").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const q = doc.data().text;
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <p><strong>${q}</strong></p>
+            <input type="text" placeholder="あなたの回答を入力"
+                   onchange="saveAnswer('${doc.id}', this.value)">
+            <hr>
+          `;
+          area.appendChild(div);
+        });
+      });
+    }
+
+    function saveAnswer(id, answer) {
+      db.collection("questions").doc(id).update({
+        answerA: answer
+      });
+    }
+
+    window.onload = loadQuestions;
+  </script>
 
 </head>
 <body>
@@ -96,9 +100,7 @@
   <div id="answerTab" class="content active">
     <h2>質問に回答する</h2>
     <button onclick="addQuestion()">＋ 質問を追加</button>
-    <div id="questionArea">
-      <!-- ここに質問と回答欄が並ぶ -->
-    </div>
+    <div id="questionArea"></div>
   </div>
 
   <!-- 一覧タブ -->
@@ -110,7 +112,6 @@
         <th>Aさん</th>
         <th>Bさん</th>
       </tr>
-      <!-- ここに一覧が入る -->
     </table>
   </div>
 
@@ -121,10 +122,6 @@
 
       event.target.classList.add('active');
       document.getElementById(tabId).classList.add('active');
-    }
-
-    function addQuestion() {
-      alert("ここに質問追加機能を作ります（Step3で実装）");
     }
   </script>
 
