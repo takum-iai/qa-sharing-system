@@ -35,20 +35,21 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
   <script>
+    /* ★★★ 正しい firebaseConfig（あなたのスクショから反映） ★★★ */
     const firebaseConfig = {
-      apiKey: "AIzaSyB9PFIVztBLLN_0RUSL47JNOgNZ-cay2s",
+      apiKey: "AIzaSyBIP9FIv2tBLLN_0RU5L47JNOgNZ-cay2s",
       authDomain: "qa-sharing-system.firebaseapp.com",
       projectId: "qa-sharing-system",
       storageBucket: "qa-sharing-system.firebasestorage.app",
-      messagingSenderId: "96565493318",
-      appId: "1:96565493318:web:d3649b6d0178ef39847"
+      messagingSenderId: "965605493318",
+      appId: "1:965605493318:web:d36649b60d0178fef39847"
     };
 
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // ログインID方式（内部でメールに変換）
+    /* ★★★ ログインID方式（内部でメールに変換） ★★★ */
     const USERS = {
       "ayano": { name: "文乃", pass: "1125", field: "answerA", email: "ayano@ayano.com" },
       "takumi": { name: "拓海", pass: "1017", field: "answerT", email: "takumi@takumi.com" }
@@ -63,7 +64,6 @@
       const id = document.getElementById("loginId").value;
       const pass = document.getElementById("loginPass").value;
 
-      // IDとPWチェック
       if (!USERS[id] || USERS[id].pass !== pass) {
         alert("ログイン失敗：IDまたはPWが違います");
         return;
@@ -71,7 +71,6 @@
 
       const email = USERS[id].email;
 
-      // Firebase Auth にログイン（内部はメール）
       auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
           const userInfo = USERS[id];
@@ -147,7 +146,6 @@
         return;
       }
 
-      // Firebase Auth のメール → ID を逆引き
       const email = user.email;
       const userInfo = Object.values(USERS).find(u => u.email === email);
 
@@ -175,7 +173,7 @@
           tr.innerHTML = `
             <td>${index}</td>
             <td>${data.answerA || ""}</td>
-            <td>${data.answerB || ""}</td>
+            <td>${data.answerT || ""}</td>
           `;
 
           table.appendChild(tr);
@@ -256,8 +254,8 @@
     <table border="1">
       <tr>
         <th>No</th>
-        <th>Aさん</th>
-        <th>Bさん</th>
+        <th>文乃</th>
+        <th>拓海</th>
       </tr>
     </table>
   </div>
