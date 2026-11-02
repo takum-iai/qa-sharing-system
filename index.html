@@ -223,12 +223,21 @@
        タブ切り替え
     ------------------------- */
     function showTab(tabId) {
+      // タブの見た目を切り替え
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    
+      // クリックされたタブを active にする
+      const tabs = {
+        answerTab: document.querySelector('.tab[onclick="showTab(\'answerTab\')"]'),
+        listTab: document.querySelector('.tab[onclick="showTab(\'listTab\')"]')
+      };
+      tabs[tabId].classList.add('active');
+    
+      // コンテンツの表示切り替え
       document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-
-      event.target.classList.add('active');
       document.getElementById(tabId).classList.add('active');
-
+    
+      // タブごとの処理
       if (tabId === "answerTab") {
         loadQuestions();
       } else if (tabId === "listTab") {
