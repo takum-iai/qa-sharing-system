@@ -273,7 +273,10 @@
           track.appendChild(slide);
         });
     
-        updateCarousel();
+        // ★ DOM描画後に実行することで幅が正しく取れる
+        setTimeout(() => {
+          updateCarousel();
+        }, 50);
       });
     }
     
