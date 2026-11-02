@@ -274,8 +274,26 @@
         });
     
         // ★ DOM描画後に実行することで幅が正しく取れる
+        // ★ スライドが DOM に追加された後にイベント登録する
         setTimeout(() => {
-          updateCarousel();
+          const track = document.getElementById("carouselTrack");
+          if (!track) return;
+        
+          let startX = 0;
+        
+          track.addEventListener("touchstart", e => {
+            startX = e.touches[0].clientX;
+          });
+        
+          track.addEventListener("touchend", e => {
+            const endX = e.changedTouches[0].clientX;
+        
+            if (startX - endX > 50) {
+              nextSlide();
+            } else if (endX - startX > 50) {
+              prevSlide();
+            }
+          });
         }, 50);
       });
     }
