@@ -253,21 +253,26 @@
         if (user) {
           const email = user.email;
           const userInfo = Object.values(USERS).find(u => u.email === email);
-
+    
           document.getElementById("loginArea").style.display = "none";
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
-
-          loadQuestions();
-
+    
+          // ★ タブ切り替えは CSS に任せる
+          showTab("answerTab");
+    
         } else {
-
+    
           document.getElementById("loginArea").style.display = "block";
           document.getElementById("userName").innerText = "";
           document.getElementById("logoutBtn").style.display = "none";
+    
+          // ★ タブ内容を非表示にする
+          document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         }
       });
     };
+
   </script>
 
 </head>
