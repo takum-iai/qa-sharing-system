@@ -258,14 +258,9 @@
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
 
-          document.getElementById("answerTab").style.display = "block";
-          document.getElementById("listTab").style.display = "block";
-
           loadQuestions();
 
         } else {
-          document.getElementById("answerTab").style.display = "none";
-          document.getElementById("listTab").style.display = "none";
 
           document.getElementById("loginArea").style.display = "block";
           document.getElementById("userName").innerText = "";
