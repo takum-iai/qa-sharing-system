@@ -29,7 +29,7 @@
     }
   </style>
 
-  <!-- Firebase SDK（compat版） -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -44,7 +44,7 @@
       appId: "1:965605493318:web:d36649b60d0178fef39847"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
@@ -75,7 +75,10 @@
           document.getElementById("loginArea").style.display = "none";
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
-          loadQuestions();
+
+          document.getElementById("tabArea").style.display = "block";
+
+          showTab("answerTab");
         })
         .catch(err => alert("ログイン失敗：" + err.message));
     }
@@ -86,9 +89,13 @@
     function logout() {
       auth.signOut().then(() => {
         alert("ログアウトしました");
+
         document.getElementById("loginArea").style.display = "block";
         document.getElementById("userName").innerText = "";
         document.getElementById("logoutBtn").style.display = "none";
+
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.getElementById("tabArea").style.display = "none";
       });
     }
 
@@ -129,7 +136,6 @@
 
           area.appendChild(div);
 
-          // ★ 既存回答を自動セット
           const user = auth.currentUser;
           if (user) {
             const email = user.email;
@@ -186,9 +192,6 @@
         .then(() => {
           alert("質問を削除しました！");
           loadQuestions();
-        })
-        .catch(err => {
-          alert("削除に失敗しました：" + err.message);
         });
     }
 
@@ -223,21 +226,17 @@
        タブ切り替え
     ------------------------- */
     function showTab(tabId) {
-      // タブの見た目を切り替え
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
-      // クリックされたタブを active にする
+
       const tabs = {
         answerTab: document.querySelector('.tab[onclick="showTab(\'answerTab\')"]'),
         listTab: document.querySelector('.tab[onclick="showTab(\'listTab\')"]')
       };
       tabs[tabId].classList.add('active');
-    
-      // コンテンツの表示切り替え
+
       document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
-    
-      // タブごとの処理
+
       if (tabId === "answerTab") {
         loadQuestions();
       } else if (tabId === "listTab") {
@@ -253,30 +252,25 @@
         if (user) {
           const email = user.email;
           const userInfo = Object.values(USERS).find(u => u.email === email);
-    
+
           document.getElementById("loginArea").style.display = "none";
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
+
           document.getElementById("tabArea").style.display = "block";
-    
-          // ★ タブ切り替えは CSS に任せる
+
           showTab("answerTab");
-    
-    } else {
-    
-      document.getElementById("loginArea").style.display = "block";
-      document.getElementById("userName").innerText = "";
-      document.getElementById("logoutBtn").style.display = "none";
-    
-      // ★ タブの中身を非表示
-      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-    
-      // ★ タブそのものを非表示
-      document.getElementById("tabArea").style.display = "none";
-    }
+
+        } else {
+          document.getElementById("loginArea").style.display = "block";
+          document.getElementById("userName").innerText = "";
+          document.getElementById("logoutBtn").style.display = "none";
+
+          document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+          document.getElementById("tabArea").style.display = "none";
+        }
       });
     };
-
   </script>
 
 </head>
@@ -298,8 +292,8 @@
   <h1>質問共有システム</h1>
 
   <!-- タブ -->
-  <div id="tabArea">
-    <div class="tab active" onclick="showTab('answerTab')">回答する</div>
+  <div id="tabArea" style="display:none;">
+    <div class="tab" onclick="showTab('answerTab')">回答する</div>
     <div class="tab" onclick="showTab('listTab')">回答一覧</div>
   </div>
 
