@@ -124,6 +124,35 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
+    .question-toggle {
+  font-size: 18px;
+  padding: 6px 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #000;
+  font-weight: normal; /* ← 太字をやめる */
+}
+
+.answer-detail {
+  padding-left: 16px;
+  margin-bottom: 10px;
+  display: none; /* ← JSで開く */
+  background: none;
+  border: none;
+}
+
+.answer-detail p {
+  margin: 4px 0;
+  font-size: 16px;
+  color: #000;
+}
+
+/* タップ時の青緑色を完全に消す */
+* {
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
 
 
   </style>
@@ -299,37 +328,39 @@
     ------------------------- */
     let currentSlide = 0;
     
-    function loadAnswerList() {
-      const listArea = document.getElementById("answerListArea");
-      listArea.innerHTML = "";
-    
-      db.collection("questions").orderBy("createdAt").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const data = doc.data();
-    
-          // ▼ 質問タイトル部分（あなたの求める見た目）
-          const q = document.createElement("div");
-          q.className = "question-toggle";
-          q.innerText = "▼ " + data.text;
-    
-          // ▼ 折りたたみ部分（あなたの求める見た目）
-          const detail = document.createElement("div");
-          detail.className = "answer-detail";
-          detail.innerHTML = `
-            <p>文乃：${data.answerA || "（未回答）"}</p>
-            <p>拓海：${data.answerT || "（未回答）"}</p>
-          `;
-    
-          // ▼ タップで開閉
-          q.onclick = () => {
-            detail.style.display = detail.style.display === "none" ? "block" : "none";
-          };
-    
-          listArea.appendChild(q);
-          listArea.appendChild(detail);
-        });
-      });
-    }
+function loadAnswerList() {
+  const listArea = document.getElementById("answerListArea");
+  listArea.innerHTML = "";
+
+  db.collection("questions").orderBy("createdAt").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+
+      // ▼ 質問タイトル（普通の文字）
+      const q = document.createElement("div");
+      q.className = "question-toggle";
+      q.innerText = "▼ " + data.text;
+
+      // ▼ 回答部分（最初から展開）
+      const detail = document.createElement("div");
+      detail.className = "answer-detail";
+      detail.style.display = "block"; // ← 最初から展開する
+      detail.innerHTML = `
+        <p>文乃：${data.answerA || "（未回答）"}</p>
+        <p>拓海：${data.answerT || "（未回答）"}</p>
+      `;
+
+      // ▼ タップで開閉（必要なら残す）
+      q.onclick = () => {
+        detail.style.display = detail.style.display === "none" ? "block" : "none";
+      };
+
+      listArea.appendChild(q);
+      listArea.appendChild(detail);
+    });
+  });
+}
+
     
     function updateCarousel() {
       const track = document.getElementById("carouselTrack");
