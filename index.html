@@ -103,6 +103,25 @@
       margin: 6px 0;
       font-size: 16px;
     }
+
+    .question-toggle {
+      font-size: 18px;
+      padding: 8px 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .answer-detail {
+      padding-left: 16px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    
+    .answer-detail p {
+      margin: 4px 0;
+      font-size: 16px;
+    }
+
   </style>
 
   <!-- Firebase SDK -->
@@ -284,17 +303,17 @@
         snapshot.forEach(doc => {
           const data = doc.data();
     
-          // ▼ 質問タイトル部分
+          // ▼ 質問タイトル部分（あなたの求める見た目）
           const q = document.createElement("div");
           q.className = "question-toggle";
-          q.innerText = data.text;
+          q.innerText = "▼ " + data.text;
     
-          // ▼ 折りたたみ部分
+          // ▼ 折りたたみ部分（あなたの求める見た目）
           const detail = document.createElement("div");
           detail.className = "answer-detail";
           detail.innerHTML = `
-            <p><strong>文乃：</strong> ${data.answerA || "（未回答）"}</p>
-            <p><strong>拓海：</strong> ${data.answerT || "（未回答）"}</p>
+            <p>文乃：${data.answerA || "（未回答）"}</p>
+            <p>拓海：${data.answerT || "（未回答）"}</p>
           `;
     
           // ▼ タップで開閉
@@ -432,8 +451,6 @@
   <h2>回答一覧</h2>
   <div id="answerListArea"></div>
 </div>
-
-
 
 </body>
 </html>
