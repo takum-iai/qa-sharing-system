@@ -121,13 +121,27 @@
           const data = doc.data();
           const div = document.createElement("div");
 
-      div.innerHTML = `
-        <p><strong>${data.text}</strong></p>
-        <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
-        <button onclick="sendAnswer('${doc.id}')">送信</button>
-        <button onclick="deleteQuestion('${doc.id}')">削除</button>
-        <hr>
-      `;
+    div.innerHTML = `
+      <p><strong>${data.text}</strong></p>
+      <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
+      <button onclick="sendAnswer('${doc.id}')">送信</button>
+      <button onclick="deleteQuestion('${doc.id}')">削除</button>
+      <hr>
+    `;
+    
+    area.appendChild(div);
+    
+    // ★ 既存回答を自動セット（編集可能にする）
+    const user = auth.currentUser;
+    if (user) {
+      const email = user.email;
+      const userInfo = Object.values(USERS).find(u => u.email === email);
+      const field = userInfo.field;
+    
+      if (data[field]) {
+        document.getElementById(`answer_${doc.id}`).value = data[field];
+      }
+    }
 
           area.appendChild(div);
         });
