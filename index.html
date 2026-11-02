@@ -156,6 +156,19 @@
       });
     }
 
+    function deleteQuestion(id) {
+      if (!confirm("この質問を削除しますか？")) return;
+    
+      db.collection("questions").doc(id).delete()
+        .then(() => {
+          alert("質問を削除しました！");
+          loadQuestions(); // 再読み込み
+        })
+        .catch(err => {
+          alert("削除に失敗しました：" + err.message);
+        });
+    }
+
     /* -------------------------
        回答一覧読み込み
     ------------------------- */
