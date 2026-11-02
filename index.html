@@ -258,14 +258,16 @@
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
     
-          // ★ 質問欄を表示
+          // ★ 質問欄と回答一覧を表示
           document.getElementById("answerTab").style.display = "block";
+          document.getElementById("listTab").style.display = "block";
     
           loadQuestions();
     
         } else {
-          // ★ ログインしていない場合は質問欄を非表示
+          // ★ ログインしていない場合は両方非表示
           document.getElementById("answerTab").style.display = "none";
+          document.getElementById("listTab").style.display = "none";
     
           document.getElementById("loginArea").style.display = "block";
           document.getElementById("userName").innerText = "";
