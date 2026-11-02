@@ -233,16 +233,30 @@
     window.onload = () => {
       auth.onAuthStateChanged(user => {
         if (user) {
+          // ログインしている場合
           const email = user.email;
           const userInfo = Object.values(USERS).find(u => u.email === email);
-
+    
           document.getElementById("loginArea").style.display = "none";
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
+    
+          // ★ 質問欄を表示
+          document.getElementById("answerTab").style.display = "block";
+    
           loadQuestions();
+    
+        } else {
+          // ★ ログインしていない場合は質問欄を非表示
+          document.getElementById("answerTab").style.display = "none";
+    
+          document.getElementById("loginArea").style.display = "block";
+          document.getElementById("userName").innerText = "";
+          document.getElementById("logoutBtn").style.display = "none";
         }
       });
     };
+
   </script>
 
 </head>
