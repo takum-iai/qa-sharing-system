@@ -80,6 +80,29 @@
     .carousel-btn-right {
       right: 10px;
     }
+
+    .question-toggle {
+      font-size: 18px;
+      padding: 12px;
+      background: #eee;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    
+    .answer-detail {
+      padding: 10px 16px;
+      display: none;
+      background: #fafafa;
+      border-left: 3px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    
+    .answer-detail p {
+      margin: 6px 0;
+      font-size: 16px;
+    }
   </style>
 
   <!-- Firebase SDK -->
@@ -254,47 +277,34 @@
     let currentSlide = 0;
     
     function loadAnswerList() {
-      const track = document.getElementById("carouselTrack");
-      track.innerHTML = "";
+      const listArea = document.getElementById("answerListArea");
+      listArea.innerHTML = "";
     
       db.collection("questions").orderBy("createdAt").get().then(snapshot => {
         snapshot.forEach(doc => {
           const data = doc.data();
     
-          const slide = document.createElement("div");
-          slide.className = "carousel-slide";
+          // ▼ 質問タイトル部分
+          const q = document.createElement("div");
+          q.className = "question-toggle";
+          q.innerText = data.text;
     
-          slide.innerHTML = `
-            <h3>${data.text}</h3>
+          // ▼ 折りたたみ部分
+          const detail = document.createElement("div");
+          detail.className = "answer-detail";
+          detail.innerHTML = `
             <p><strong>文乃：</strong> ${data.answerA || "（未回答）"}</p>
             <p><strong>拓海：</strong> ${data.answerT || "（未回答）"}</p>
           `;
     
-          track.appendChild(slide);
-        });
+          // ▼ タップで開閉
+          q.onclick = () => {
+            detail.style.display = detail.style.display === "none" ? "block" : "none";
+          };
     
-        // ★ DOM描画後に実行することで幅が正しく取れる
-        // ★ スライドが DOM に追加された後にイベント登録する
-        setTimeout(() => {
-          const track = document.getElementById("carouselTrack");
-          if (!track) return;
-        
-          let startX = 0;
-        
-          track.addEventListener("touchstart", e => {
-            startX = e.touches[0].clientX;
-          });
-        
-          track.addEventListener("touchend", e => {
-            const endX = e.changedTouches[0].clientX;
-        
-            if (startX - endX > 50) {
-              nextSlide();
-            } else if (endX - startX > 50) {
-              prevSlide();
-            }
-          });
-        }, 50);
+          listArea.appendChild(q);
+          listArea.appendChild(detail);
+        });
       });
     }
     
@@ -420,18 +430,9 @@
   <!-- 一覧タブ -->
 <div id="listTab" class="content">
   <h2>回答一覧</h2>
-
-  <div class="carousel-container">
-
-    <button class="carousel-btn carousel-btn-left" onclick="prevSlide()">←</button>
-    <button class="carousel-btn carousel-btn-right" onclick="nextSlide()">→</button>
-
-    <div id="carouselTrack" class="carousel-track">
-      <!-- JS がここにスライドを追加します -->
-    </div>
-
-  </div>
+  <div id="answerListArea"></div>
 </div>
+
 
 
 </body>
