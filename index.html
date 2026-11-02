@@ -39,7 +39,7 @@
       apiKey: "AIzaSyBI9PFIv2tBLLN_0RU5L47JNOgNZ-cay2s",
       authDomain: "qa-sharing-system.firebaseapp.com",
       projectId: "qa-sharing-system",
-      storageBucket: "qa-sharing-system.firebasestorage.app",
+      storageBucket: "qa-sharing-system.appspot.com",
       messagingSenderId: "965605493318",
       appId: "1:965605493318:web:d36649b60d0178fef39847"
     };
@@ -115,12 +115,12 @@
     function loadQuestions() {
       const area = document.getElementById("questionArea");
       area.innerHTML = "";
-    
+
       db.collection("questions").orderBy("createdAt").get().then(snapshot => {
         snapshot.forEach(doc => {
           const data = doc.data();
           const div = document.createElement("div");
-    
+
           div.innerHTML = `
             <p><strong>${data.text}</strong></p>
             <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
@@ -128,39 +128,20 @@
             <button onclick="deleteQuestion('${doc.id}')">削除</button>
             <hr>
           `;
-    
+
           area.appendChild(div);
-    
-          // ★★★ ここで既存回答をセットする ★★★
+
+          // ★ 既存回答を自動セット（編集可能にする）
           const user = auth.currentUser;
           if (user) {
             const email = user.email;
             const userInfo = Object.values(USERS).find(u => u.email === email);
             const field = userInfo.field;
-    
+
             if (data[field]) {
               document.getElementById(`answer_${doc.id}`).value = data[field];
             }
           }
-        });
-      });
-    }
-    
-    area.appendChild(div);
-    
-    // ★ 既存回答を自動セット（編集可能にする）
-    const user = auth.currentUser;
-    if (user) {
-      const email = user.email;
-      const userInfo = Object.values(USERS).find(u => u.email === email);
-      const field = userInfo.field;
-    
-      if (data[field]) {
-        document.getElementById(`answer_${doc.id}`).value = data[field];
-      }
-    }
-
-          area.appendChild(div);
         });
       });
     }
@@ -187,13 +168,16 @@
       });
     }
 
+    /* -------------------------
+       質問削除
+    ------------------------- */
     function deleteQuestion(id) {
       if (!confirm("この質問を削除しますか？")) return;
-    
+
       db.collection("questions").doc(id).delete()
         .then(() => {
           alert("質問を削除しました！");
-          loadQuestions(); // 再読み込み
+          loadQuestions();
         })
         .catch(err => {
           alert("削除に失敗しました：" + err.message);
@@ -250,32 +234,30 @@
     window.onload = () => {
       auth.onAuthStateChanged(user => {
         if (user) {
-          // ログインしている場合
           const email = user.email;
           const userInfo = Object.values(USERS).find(u => u.email === email);
-    
+
           document.getElementById("loginArea").style.display = "none";
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
-    
-          // ★ 質問欄と回答一覧を表示
+
+          // ★ ログイン時は両タブを表示
           document.getElementById("answerTab").style.display = "block";
           document.getElementById("listTab").style.display = "block";
-    
+
           loadQuestions();
-    
+
         } else {
-          // ★ ログインしていない場合は両方非表示
+          // ★ ログインしていない場合は両タブ非表示
           document.getElementById("answerTab").style.display = "none";
           document.getElementById("listTab").style.display = "none";
-    
+
           document.getElementById("loginArea").style.display = "block";
           document.getElementById("userName").innerText = "";
           document.getElementById("logoutBtn").style.display = "none";
         }
       });
     };
-
   </script>
 
 </head>
