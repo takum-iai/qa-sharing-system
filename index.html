@@ -48,7 +48,6 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    /* ★★★ ログインID方式（内部でメールに変換） ★★★ */
     const USERS = {
       "ayano": { name: "文乃", pass: "ayano1125", field: "answerA", email: "ayano@ayano.com" },
       "takumi": { name: "拓海", pass: "takumi1017", field: "answerT", email: "takumi@takumi.com" }
@@ -124,14 +123,13 @@
           div.innerHTML = `
             <p><strong>${data.text}</strong></p>
             <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
-            <button onclick="sendAnswer('${doc.id}')">送信</button>
             <button onclick="deleteQuestion('${doc.id}')">削除</button>
             <hr>
           `;
 
           area.appendChild(div);
 
-          // ★ 既存回答を自動セット（編集可能にする）
+          // ★ 既存回答を自動セット
           const user = auth.currentUser;
           if (user) {
             const email = user.email;
@@ -147,12 +145,10 @@
     }
 
     /* -------------------------
-       回答送信（ログインユーザーごとに保存）
+       一括送信
     ------------------------- */
-    function sendAnswer(id) {
-      const answer = document.getElementById(`answer_${id}`).value;
+    function sendAllAnswers() {
       const user = auth.currentUser;
-
       if (!user) {
         alert("ログインしてください");
         return;
@@ -160,11 +156,23 @@
 
       const email = user.email;
       const userInfo = Object.values(USERS).find(u => u.email === email);
+      const field = userInfo.field;
 
-      db.collection("questions").doc(id).update({
-        [userInfo.field]: answer
-      }).then(() => {
-        alert("回答を送信しました！");
+      db.collection("questions").get().then(snapshot => {
+        const batch = db.batch();
+
+        snapshot.forEach(doc => {
+          const answer = document.getElementById(`answer_${doc.id}`).value;
+          const ref = db.collection("questions").doc(doc.id);
+
+          batch.update(ref, {
+            [field]: answer
+          });
+        });
+
+        batch.commit().then(() => {
+          alert("すべての回答を送信しました！");
+        });
       });
     }
 
@@ -241,14 +249,12 @@
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
 
-          // ★ ログイン時は両タブを表示
           document.getElementById("answerTab").style.display = "block";
           document.getElementById("listTab").style.display = "block";
 
           loadQuestions();
 
         } else {
-          // ★ ログインしていない場合は両タブ非表示
           document.getElementById("answerTab").style.display = "none";
           document.getElementById("listTab").style.display = "none";
 
@@ -288,6 +294,7 @@
   <div id="answerTab" class="content active">
     <h2>質問に回答する</h2>
     <button onclick="addQuestion()">＋ 質問を追加</button>
+    <button onclick="sendAllAnswers()">すべて送信</button>
     <div id="questionArea"></div>
   </div>
 
