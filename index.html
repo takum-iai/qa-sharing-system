@@ -257,19 +257,23 @@
           document.getElementById("loginArea").style.display = "none";
           document.getElementById("userName").innerText = "ログイン中：" + userInfo.name;
           document.getElementById("logoutBtn").style.display = "inline-block";
+          document.getElementById("tabArea").style.display = "block";
     
           // ★ タブ切り替えは CSS に任せる
           showTab("answerTab");
     
-        } else {
+    } else {
     
-          document.getElementById("loginArea").style.display = "block";
-          document.getElementById("userName").innerText = "";
-          document.getElementById("logoutBtn").style.display = "none";
+      document.getElementById("loginArea").style.display = "block";
+      document.getElementById("userName").innerText = "";
+      document.getElementById("logoutBtn").style.display = "none";
     
-          // ★ タブ内容を非表示にする
-          document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        }
+      // ★ タブの中身を非表示
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    
+      // ★ タブそのものを非表示
+      document.getElementById("tabArea").style.display = "none";
+    }
       });
     };
 
@@ -294,7 +298,7 @@
   <h1>質問共有システム</h1>
 
   <!-- タブ -->
-  <div>
+  <div id="tabArea">
     <div class="tab active" onclick="showTab('answerTab')">回答する</div>
     <div class="tab" onclick="showTab('listTab')">回答一覧</div>
   </div>
