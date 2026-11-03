@@ -257,7 +257,7 @@
 
           div.innerHTML = `
             <p><strong>${data.text}</strong></p>
-            <input id="answer_${doc.id}" type="text" placeholder="あなたの回答を入力">
+            <input type="text" placeholder="あなたの回答を入力" onchange="saveAnswer('${doc.id}', this.value)">
             <button onclick="deleteQuestion('${doc.id}')">削除</button>
             <hr>
           `;
@@ -485,7 +485,6 @@ function loadAnswerList() {
   <!-- 回答タブ -->
   <div id="answerTab" class="content">
     <button onclick="addQuestion()">＋ 追加</button>
-    <button onclick="sendAllAnswers()">送信</button>
     <div id="questionArea"></div>
   </div>
 
