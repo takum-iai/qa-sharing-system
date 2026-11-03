@@ -80,25 +80,28 @@
     .carousel-btn-right {
       right: 10px;
     }
-/* ▼ 質問タイトル */
+/* 質問タイトル（▼あああ）を細くする */
 .question-toggle {
+  width: 80%;          /* ← 横幅を狭くする（70〜90%で調整可能） */
+  margin: 0 auto;      /* ← 中央寄せ */
   font-size: 18px;
   padding: 6px 0;
   cursor: pointer;
-  font-weight: bold;
   background: none;
   border: none;
   color: #000;
+  font-weight: normal;
 }
 
-/* 回答部分（真っ白・線なし） */
+/* 回答部分も同じ幅に揃える */
 .answer-detail {
+  width: 80%;          /* ← 質問と同じ幅にする */
+  margin: 0 auto 10px; /* ← 中央寄せ＋下に余白 */
   padding-left: 16px;
-  margin-bottom: 10px;
-  display: none;
   background: none;
   border: none;
 }
+
 
 /* 回答テキスト（余計な装飾なし） */
 .answer-detail p {
