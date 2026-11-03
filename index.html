@@ -249,28 +249,34 @@
     function loadQuestions() {
       const area = document.getElementById("questionArea");
       area.innerHTML = "";
-
+    
       db.collection("questions").orderBy("createdAt").get().then(snapshot => {
         snapshot.forEach(doc => {
           const data = doc.data();
           const div = document.createElement("div");
-
+    
           div.innerHTML = `
-            <p><strong>${data.text}</strong></p>
-            <input type="text" placeholder="あなたの回答を入力" onchange="saveAnswer('${doc.id}', this.value)">
+            <p>${data.text}</p>
+            <input id="answer_${doc.id}" 
+                   type="text" 
+                   placeholder="あなたの回答を入力"
+                   onchange="saveAnswer('${doc.id}', this.value)"
+                   value="${data.answerT || ''}">
             <button onclick="deleteQuestion('${doc.id}')">削除</button>
             <hr>
           `;
-
+    
           area.appendChild(div);
-
+    
+          // ★ ユーザーごとの回答を反映（存在する場合のみ）
           const user = auth.currentUser;
           if (user) {
             const email = user.email;
             const userInfo = Object.values(USERS).find(u => u.email === email);
             const field = userInfo.field;
-
+    
             if (data[field]) {
+              // ★ 今度は必ず存在する input を参照できる
               document.getElementById(`answer_${doc.id}`).value = data[field];
             }
           }
