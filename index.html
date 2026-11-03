@@ -352,7 +352,15 @@ function loadAnswerList() {
 
       // ▼ タップで開閉（必要なら残す）
       q.onclick = () => {
-        detail.style.display = detail.style.display === "none" ? "block" : "none";
+        const isOpen = detail.style.display === "block";
+      
+        if (isOpen) {
+          detail.style.display = "none";
+          q.innerText = "▶ " + data.text;  // 閉じたら ▶ に
+        } else {
+          detail.style.display = "block";
+          q.innerText = "▼ " + data.text;  // 開いたら ▼ に
+        }
       };
 
       listArea.appendChild(q);
