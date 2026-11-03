@@ -165,14 +165,6 @@
   color: #888; /* グレー */
 }
 
-    /* カテゴリ名（【日常】など）の幅を狭くする */
-.category-title {
-  width: 80%;        /* ← 質問と同じ幅にする（70%〜60%でもOK） */
-  margin-left: 10%;    /* ← 左寄せ */
-  font-size: 20px;
-  font-weight: bold;
-}
-
   </style>
 
   <!-- Firebase SDK -->
@@ -378,7 +370,6 @@ function loadAnswerList() {
     // カテゴリごとに表示
     Object.keys(categories).forEach(cat => {
       const catTitle = document.createElement("h3");
-      catTitle.className = "category-title";   // ← 追加
       catTitle.innerText = `【${cat}】`;
       listArea.appendChild(catTitle);
 
