@@ -153,7 +153,14 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
+.answer-detail p {
+  margin: 4px 0;
+  font-size: 16px;
+}
 
+.answer-detail p.unanswered {
+  color: #888; /* グレー */
+}
 
   </style>
 
@@ -352,8 +359,8 @@ function loadAnswerList() {
       detail.className = "answer-detail";
       detail.style.display = "block"; // ← 最初から展開する
       detail.innerHTML = `
-        <p>文乃：${data.answerA || "（未回答）"}</p>
-        <p>拓海：${data.answerT || "（未回答）"}</p>
+        <p class="${!data.answerA ? 'unanswered' : ''}">文乃：${data.answerA || "（未回答）"}</p>
+        <p class="${!data.answerT ? 'unanswered' : ''}">拓海：${data.answerT || "（未回答）"}</p>
       `;
 
       // ▼ タップで開閉（必要なら残す）
